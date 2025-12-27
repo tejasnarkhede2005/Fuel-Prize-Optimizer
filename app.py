@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from xgboost import XGBRegressor
 from sklearn.model_selection import train_test_split
+import os
 
 # ------------------------------------
 # PAGE CONFIG
@@ -17,32 +18,23 @@ st.caption("ML-based pricing engine using XGBoost with business guardrails")
 # ------------------------------------
 MAX_DAILY_CHANGE = 0.05     # 5%
 MIN_MARGIN = 0.03           # 3%
-COMPETITIVE_LIMIT = 0.02    # 2%
+COMPETITIVE_LIMIT = 0.02   # 2%
 
 # ------------------------------------
-# FILE UPLOAD
+# LOAD DATA (NO UPLOAD)
 # ------------------------------------
-st.sidebar.header("📂 Upload Historical Data")
+DATA_PATH = "oil.csv"
 
-uploaded_file = st.sidebar.file_uploader(
-    "Upload oil.csv",
-    type=["csv"]
-)
-
-if uploaded_file is None:
-    st.warning("⬅️ Please upload oil.csv to continue")
-    st.stop()
-
-# ------------------------------------
-# LOAD DATA
-# ------------------------------------
 @st.cache_data
-def load_data(file):
-    df = pd.read_csv(file, parse_dates=["date"])
+def load_data():
+    if not os.path.exists(DATA_PATH):
+        st.error("❌ oil.csv not found. Please place it in the project root.")
+        st.stop()
+    df = pd.read_csv(DATA_PATH, parse_dates=["date"])
     df.sort_values("date", inplace=True)
     return df
 
-df = load_data(uploaded_file)
+df = load_data()
 
 # ------------------------------------
 # FEATURE ENGINEERING
